@@ -6,6 +6,15 @@
 #include <vtkOrientationMarkerWidget.h>
 #include <vtkSmartPointer.h>
 
+#if _WIN32
+#include <corecrt_io.h>
+#endif
+
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/visualization/cloud_viewer.h>
+#include <pcl/visualization/pcl_visualizer.h>
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class DisplayModel;
@@ -45,8 +54,15 @@ protected:
      */
     void addModel(vtkSmartPointer<vtkActor>);
 
+    /**
+     * @brief 添加点云
+     */
+    void addPointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr);
+
 private:
-    Ui::DisplayModel* ui;
+    Ui::DisplayModel* ui = nullptr;
+
+    pcl::visualization::PCLVisualizer::Ptr _viewer = nullptr;
 
     vtkSmartPointer<vtkOrientationMarkerWidget> _borderWidget { nullptr };
 };

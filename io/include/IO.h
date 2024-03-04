@@ -8,6 +8,13 @@
 #include <vtkSTLReader.h>
 #include <vtkSmartPointer.h>
 
+#if _WIN32
+#include <corecrt_io.h>
+#endif
+
+#include <pcl/io/auto_io.h>
+#include <pcl/point_types.h>
+
 #include <unordered_map>
 
 namespace IO {
@@ -26,10 +33,6 @@ namespace Model {
         // Visualize
         vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
         mapper->SetInputConnection(reader->GetOutputPort());
-        // 如果没有面片，返回空
-        if (mapper->GetInput()->GetNumberOfCells() == 0) {
-            return nullptr;
-        }
         vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
         actor->SetMapper(mapper);
         return actor;
@@ -62,17 +65,21 @@ namespace Model {
     }
 
 }; // namespace Model
-namespace PointCloud {
+namespace PC {
     /**
      * @brief 读取点云
      * @param filename 文件路径
      * @return  vtkActor
      */
-    template <typename T>
-    vtkSmartPointer<vtkActor> ReadPointCloud(const std::string& filename)
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr Read(const std::string& filename)
     {
-        // TODO
-        return nullptr;
+        pcl::PCLPointCloud2 cloud_blob;
+        if (pcl::io::load(filename, cloud_blob) < 0) {
+            return nullptr;
+        }
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+        pcl::fromPCLPointCloud2(cloud_blob, *cloud);
+        return cloud;
     }
 
 }; // namespace PointCloud

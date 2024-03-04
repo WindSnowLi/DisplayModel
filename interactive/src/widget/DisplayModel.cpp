@@ -19,6 +19,10 @@ DisplayModel::DisplayModel(QWidget* parent)
     , ui(new Ui::DisplayModel)
 {
     ui->setupUi(this);
+
+    ui->type->addItem(tr("模型"));
+    ui->type->addItem(tr("点云"));
+
     ui->path->installEventFilter(this);
 
     auto renderWindow = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
@@ -37,6 +41,10 @@ DisplayModel::DisplayModel(QWidget* parent)
     renderer->SetBackground2(0.529, 0.8078, 0.92157);
     // 开启渐变色背景设置
     renderer->SetGradientBackground(true);
+
+    _viewer = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer(renderer, renderWindow, "", false));
+
+    _viewer->setupInteractor(ui->view->interactor(), renderWindow);
 
     // 激活同步坐标小窗
     this->_borderWidget = vtkOrientationMarkerWidget::New();
@@ -94,9 +102,21 @@ void DisplayModel::onSelectedModel()
 void DisplayModel::addModel(vtkSmartPointer<vtkActor> actor)
 {
     if (actor == nullptr) {
+        qDebug() << "actor is null";
         return;
     }
     ui->view->renderWindow()->GetRenderers()->GetFirstRenderer()->AddActor(actor);
+    ui->view->renderWindow()->Render();
+}
+
+void DisplayModel::addPointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
+{
+    if (cloud == nullptr) {
+        qDebug() << "cloud is null";
+        return;
+    }
+    _viewer->addPointCloud(cloud, "cloud");
+    _viewer->resetCamera();
     ui->view->renderWindow()->Render();
 }
 
@@ -106,6 +126,10 @@ void DisplayModel::onLoadModel()
     if (fileName.isEmpty()) {
         return;
     }
-    auto&& actor = IO::Model::Read(fileName.toStdString());
-    this->addModel(actor);
+    auto&& type = ui->type->currentText();
+    if (type == tr("模型")) {
+        this->addModel(IO::Model::Read(fileName.toStdString()));
+    } else if (type == tr("点云")) {
+        this->addPointCloud(IO::PC::Read(fileName.toStdString()));
+    }
 }

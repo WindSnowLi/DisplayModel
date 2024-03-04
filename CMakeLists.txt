@@ -21,7 +21,11 @@ find_package(VTK COMPONENTS
   CommonColor
   CommonCore  
   CommonDataModel
-  CommonTransforms
+  CommonTransforms  
+  IOPLY
+  IOGeometry
+  IOChemistry
+  RenderingGL2PSOpenGL2
   RenderingAnnotation
   FiltersSources
   InteractionStyle
@@ -34,6 +38,38 @@ find_package(VTK COMPONENTS
   GUISupportQt
   RenderingQt
 )
+
+find_package(PCL REQUIRED COMPONENTS common visualization)
+
+if(NOT VTK_FOUND)
+  message(FATAL_ERROR "Unable to find the VTK build folder.")
+endif()
+
+if(NOT(TARGET VTK::GUISupportQt))
+  message(FATAL_ERROR "VTK not built with Qt support.")
+endif()
+
+if(NOT DEFINED VTK_QT_VERSION)
+  set(VTK_QT_VERSION 6)
+endif()
+
+message("found VTK. Version:" ${VTK_VERSION}. VTK_DIR: ${VTK_DIR})
+
+
+if(NOT PCL_FOUND)
+	message(FATAL_ERROR "PCL not found.")
+else()
+	add_definitions(${PCL_DEFINITIONS})
+	message("found PCL. Version:" ${PCL_VERSION}. PCL_DIR: ${PCL_DIR})
+	# 输出 PCL 的头文件路径
+	message("PCL include directories: ${PCL_INCLUDE_DIRS}")
+	# 输出 PCL 的库文件路径
+	message("PCL library directories: ${PCL_LIBRARY_DIRS}")
+	# 引入PCL的头文件
+	include_directories(${PCL_INCLUDE_DIRS})
+	link_directories(${PCL_LIBRARY_DIRS})
+endif()
+
 
 set(TS_FILES "interactive/i18/DisplayModel_zh_CN.ts")
 
@@ -53,20 +89,6 @@ set(PROJECT_SOURCES
         "interactive/include/widget/DisplayModel.h"
         ${TS_FILES}
 )
-
-if(NOT VTK_FOUND)
-  message(FATAL_ERROR "Unable to find the VTK build folder.")
-endif()
-
-if(NOT(TARGET VTK::GUISupportQt))
-  message(FATAL_ERROR "VTK not built with Qt support.")
-endif()
-
-if(NOT DEFINED VTK_QT_VERSION)
-  set(VTK_QT_VERSION 6)
-endif()
-
-message("found VTK. Version:" ${VTK_VERSION}. VTK_DIR: ${VTK_DIR})
 
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -97,6 +119,7 @@ else()
 endif()
 
 target_link_libraries(DisplayModel PRIVATE io)
+target_link_libraries(DisplayModel PRIVATE ${PCL_LIBRARIES})
 target_link_libraries(DisplayModel PRIVATE ${VTK_LIBRARIES})
 target_link_libraries(DisplayModel PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 
