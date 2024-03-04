@@ -106,6 +106,6 @@ void DisplayModel::onLoadModel()
     if (fileName.isEmpty()) {
         return;
     }
-    auto&& actor = IO::Read(fileName.toStdString());
+    auto&& actor = IO::Model::Read(fileName.toStdString());
     this->addModel(actor);
 }
