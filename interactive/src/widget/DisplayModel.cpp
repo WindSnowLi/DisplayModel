@@ -6,6 +6,7 @@
 
 #include <vtkAxesActor.h>
 #include <vtkCamera.h>
+#include <vtkCaptionActor2D.h>
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkRendererCollection.h>
@@ -61,12 +62,30 @@ DisplayModel::DisplayModel(QWidget* parent)
 
     // 设置摄像头位置，1000，1000，1000指向0，0，0
     auto&& camera = renderer->GetActiveCamera();
-    camera->SetPosition(3000, 3000, 3000);
+    camera->SetPosition(30, 30, 30);
     // 视野Z轴向上
     camera->SetViewUp(0, 0, 1);
     camera->SetFocalPoint(0, 0, 0);
 
     renderer->ResetCamera();
+
+    // 添加基础坐标系显示
+    renderer->AddActor([]() {
+        vtkNew<vtkAxesActor> axes;
+        axes->SetTotalLength(10, 10, 10);
+        axes->SetPosition(0, 0, 0);
+        axes->SetShaftType(0);
+        axes->SetConeResolution(100);
+        axes->SetCylinderResolution(100);
+        axes->SetConeRadius(0.1);
+        axes->SetCylinderRadius(0.01);
+        // 隐藏标签label
+        axes->AxisLabelsOff();
+        axes->GetXAxisCaptionActor2D()->GetProperty()->SetOpacity(0.7);
+        axes->GetYAxisCaptionActor2D()->GetProperty()->SetOpacity(0.7);
+        axes->GetZAxisCaptionActor2D()->GetProperty()->SetOpacity(0.7);
+        return axes;
+    }());
 
     QObject::connect(ui->loadBtn, &QPushButton::clicked, this, &DisplayModel::onLoadModel);
 }
