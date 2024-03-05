@@ -1,16 +1,28 @@
 ﻿#pragma once
 
+#include <vtk3DSImporter.h>
 #include <vtkActor.h>
+#include <vtkCMLMoleculeReader.h>
+#include <vtkExodusIIReader.h>
+#include <vtkGLTFImporter.h>
+#include <vtkMultiBlockPLOT3DReader.h>
+#include <vtkOBJImporter.h>
 #include <vtkOBJReader.h>
 #include <vtkPDBReader.h>
 #include <vtkPLYReader.h>
 #include <vtkPolyDataMapper.h>
+#include <vtkRenderWindow.h>
+#include <vtkRendererCollection.h>
+#include <vtkSLCReader.h>
 #include <vtkSTLReader.h>
+#include <vtkSimplePointsReader.h>
 #include <vtkSmartPointer.h>
+#include <vtkVRMLImporter.h>
 
 #if _WIN32
 #include <corecrt_io.h>
 #endif
+#include <type_traits>
 
 #include <pcl/io/auto_io.h>
 #include <pcl/point_types.h>
@@ -29,12 +41,30 @@ namespace Model {
     {
         vtkSmartPointer<T> reader = vtkSmartPointer<T>::New();
         reader->SetFileName(filename.c_str());
-
-        // Visualize
-        vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-        mapper->SetInputConnection(reader->GetOutputPort());
         vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-        actor->SetMapper(mapper);
+        if constexpr (std::is_same<T, vtkGLTFImporter>::value || std::is_same<T, vtk3DSImporter>::value) {
+            vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+            vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+            renderWindow->AddRenderer(renderer);
+            reader->SetRenderWindow(renderWindow);
+            if constexpr (std::is_same<T, vtk3DSImporter>::value) {
+                reader->ComputeNormalsOn();
+            }
+            reader->Update();
+            auto&& ta = renderWindow->GetRenderers()->GetFirstRenderer()->GetActors()->GetLastActor();
+            if (!ta) {
+				return nullptr;
+			}
+            // 深度复制
+            actor->ShallowCopy(ta);
+        } else {
+            vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+            mapper->SetInputConnection(reader->GetOutputPort());
+
+            actor->SetMapper(mapper);
+        }
+        reader->Update();
+
         return actor;
     }
 
@@ -57,6 +87,12 @@ namespace Model {
             { "stl", ReadModel<vtkSTLReader> },
             { "obj", ReadModel<vtkOBJReader> },
             { "pdb", ReadModel<vtkPDBReader> },
+            { "gltf", ReadModel<vtkGLTFImporter> },
+            { "3ds", ReadModel<vtk3DSImporter> },
+            //         { "cml", ReadModel<vtkCMLMoleculeReader> },
+            //{ "wrl", ReadModel<vtkVRMLImporter> },
+            //         { "bin", ReadModel<vtkMultiBlockPLOT3DReader> },
+            //{ "slc", ReadModel<vtkSLCReader> },
         };
         if (map.find(type) == map.end()) {
             return nullptr;
@@ -71,16 +107,7 @@ namespace PC {
      * @param filename 文件路径
      * @return  vtkActor
      */
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr Read(const std::string& filename)
-    {
-        pcl::PCLPointCloud2 cloud_blob;
-        if (pcl::io::load(filename, cloud_blob) < 0) {
-            return nullptr;
-        }
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-        pcl::fromPCLPointCloud2(cloud_blob, *cloud);
-        return cloud;
-    }
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr Read(const std::string& filename);
 
 }; // namespace PointCloud
-}; // namespace Io
+}; // namespace IO

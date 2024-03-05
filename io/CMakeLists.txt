@@ -14,6 +14,7 @@ find_package(VTK COMPONENTS
   IOPLY
   IOGeometry
   IOChemistry
+  IOImport
   RenderingGL2PSOpenGL2
 )
 
