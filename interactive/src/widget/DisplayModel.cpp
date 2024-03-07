@@ -111,7 +111,7 @@ bool DisplayModel::eventFilter(QObject* watched, QEvent* event)
 void DisplayModel::onSelectedModel()
 {
     auto&& type = ui->type->currentText();
-    auto&& filter = (type == tr("模型") ? tr("Files (*.ply *.stl *.obj *.pdb *.3ds *.gltf)") : tr("Files (*.pcd *.ply *.ifs *.obj)"));
+    auto&& filter = (type == tr("模型") ? tr("Files (*.ply *.stl *.obj *.pdb *.3ds *.gltf *.igs *.step)") : tr("Files (*.pcd *.ply *.ifs *.obj)"));
     // ply,stl, obj, pdb
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", filter);
     if (fileName.isEmpty()) {

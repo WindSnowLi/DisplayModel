@@ -14,7 +14,11 @@ find_package(VTK COMPONENTS
   IOPLY
   IOGeometry
   IOChemistry
-  IOImport
+  IOImport 
+  FiltersCore
+  FiltersModeling
+  IOImage
+  ImagingCore
   RenderingGL2PSOpenGL2
 )
 
@@ -52,6 +56,20 @@ else()
 	link_directories(${PCL_LIBRARY_DIRS})
 endif()
 
+find_package(OpenCASCADE REQUIRED)
+
+if(NOT OpenCASCADE_FOUND)
+	message(FATAL_ERROR "OpenCASCADE not found.")
+else()
+	message("found OpenCASCADE. Version:" ${OpenCASCADE_VERSION}. OpenCASCADE_DIR: ${OpenCASCADE_DIR})
+	# 输出 OpenCASCADE 的头文件路径
+	message("OpenCASCADE include directories: ${OpenCASCADE_INCLUDE_DIRS}")
+	# 输出 OpenCASCADE 的库文件路径
+	message("OpenCASCADE library directories: ${OpenCASCADE_LIBRARY_DIRS}")
+	# 引入OpenCASCADE的头文件
+	include_directories(${OpenCASCADE_INCLUDE_DIRS})
+	link_directories(${OpenCASCADE_LIBRARY_DIRS})
+endif()
 
 set(PROJECT_SOURCES
     "src/IO.cpp"
@@ -63,8 +81,10 @@ add_library(io SHARED ${PROJECT_SOURCES})
 
 target_link_libraries(io ${VTK_LIBRARIES})
 target_link_libraries(io ${PCL_LIBRARIES})
+target_link_libraries(io ${OpenCASCADE_LIBRARIES})
 
 target_include_directories(io PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 
 # 设置生成的 DLL 文件的输出路径
 set_target_properties(io PROPERTIES
