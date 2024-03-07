@@ -1,37 +1,11 @@
 ﻿#pragma once
 
-#include <vtk3DSImporter.h>
 #include <vtkActor.h>
-#include <vtkCMLMoleculeReader.h>
-#include <vtkContourFilter.h>
-#include <vtkExodusIIReader.h>
-#include <vtkExtractVOI.h>
-#include <vtkGLTFImporter.h>
-#include <vtkMultiBlockPLOT3DReader.h>
-#include <vtkOBJImporter.h>
-#include <vtkOBJReader.h>
-#include <vtkOutlineFilter.h>
-#include <vtkPDBReader.h>
-#include <vtkPLYReader.h>
 #include <vtkPolyDataMapper.h>
-#include <vtkProperty.h>
-#include <vtkRenderWindow.h>
-#include <vtkRendererCollection.h>
-#include <vtkSLCReader.h>
-#include <vtkSTLReader.h>
-#include <vtkSimplePointsReader.h>
 #include <vtkSmartPointer.h>
-#include <vtkVRMLImporter.h>
 
-#if _WIN32
-#include <corecrt_io.h>
-#endif
-#include <type_traits>
-
-#include <pcl/io/auto_io.h>
 #include <pcl/point_types.h>
-
-#include <unordered_map>
+#include <pcl/point_cloud.h>
 
 namespace IO {
 namespace Model {
@@ -71,6 +45,13 @@ namespace Model {
      * @return  vtkActor
      */
     vtkSmartPointer<vtkActor> ReadIGES(const std::string& filename);
+
+    /**
+     * @brief 读取STL模型
+     * @param filename 文件路径
+     * @return  vtkActor
+     */
+    vtkSmartPointer<vtkActor> ReadIGESOnMeshes(const std::string& filename);
 
     /**
      * @brief 读取STL模型

@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QMouseEvent>
 #include <QTimer>
+#include <QtConcurrent>
 
 #include <vtkAxesActor.h>
 #include <vtkCamera.h>
@@ -126,8 +127,10 @@ void DisplayModel::addModel(vtkSmartPointer<vtkActor> actor)
         qDebug() << "actor is null";
         return;
     }
-    ui->view->renderWindow()->GetRenderers()->GetFirstRenderer()->AddActor(actor);
-    ui->view->renderWindow()->Render();
+    QTimer::singleShot(0, this, [this, actor]() {
+        ui->view->renderWindow()->GetRenderers()->GetFirstRenderer()->AddActor(actor);
+        ui->view->renderWindow()->Render();
+    });
 }
 
 void DisplayModel::addPointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
@@ -136,9 +139,11 @@ void DisplayModel::addPointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
         qDebug() << "cloud is null";
         return;
     }
-    _viewer->addPointCloud(cloud, "cloud");
-    _viewer->resetCamera();
-    ui->view->renderWindow()->Render();
+    QTimer::singleShot(0, this, [this, cloud]() {
+        _viewer->addPointCloud(cloud, "cloud");
+        _viewer->resetCamera();
+        ui->view->renderWindow()->Render();
+    });
 }
 
 void DisplayModel::onLoadModel()
@@ -148,9 +153,11 @@ void DisplayModel::onLoadModel()
         return;
     }
     auto&& type = ui->type->currentText();
-    if (type == tr("模型")) {
-        this->addModel(IO::Model::Read(fileName.toStdString()));
-    } else if (type == tr("点云")) {
-        this->addPointCloud(IO::PC::Read(fileName.toStdString()));
-    }
+    static_cast<void>(QtConcurrent::run([this, type, fileName]() {
+        if (type == tr("模型")) {
+            this->addModel(IO::Model::Read(fileName.toStdString()));
+        } else if (type == tr("点云")) {
+            this->addPointCloud(IO::PC::Read(fileName.toStdString()));
+        }
+    }));
 }
