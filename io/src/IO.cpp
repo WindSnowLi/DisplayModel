@@ -40,6 +40,7 @@
 #endif
 
 #include <pcl/io/auto_io.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 
 vtkSmartPointer<vtkActor> IO::Model::ReadSLC(const std::string& filename, double isoValue)
 {
@@ -211,4 +212,15 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr IO::PC::Read(const std::string& filename)
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::fromPCLPointCloud2(cloud_blob, *cloud);
     return cloud;
+}
+
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr IO::PC::Filter(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
+{
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::StatisticalOutlierRemoval<pcl::PointXYZRGB> sor;
+    sor.setInputCloud(cloud);
+    sor.setMeanK(500);
+    sor.setStddevMulThresh(1.0);
+    sor.filter(*cloud_filtered);
+    return cloud_filtered;
 }

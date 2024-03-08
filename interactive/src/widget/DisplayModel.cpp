@@ -139,6 +139,7 @@ void DisplayModel::addPointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
         qDebug() << "cloud is null";
         return;
     }
+    qDebug() << "addPointCloud : " << cloud->size();
     QTimer::singleShot(0, this, [this, cloud]() {
         _viewer->addPointCloud(cloud, "cloud");
         _viewer->resetCamera();
@@ -157,7 +158,7 @@ void DisplayModel::onLoadModel()
         if (type == tr("模型")) {
             this->addModel(IO::Model::Read(fileName.toStdString()));
         } else if (type == tr("点云")) {
-            this->addPointCloud(IO::PC::Read(fileName.toStdString()));
+            this->addPointCloud(IO::PC::Filter(IO::PC::Read(fileName.toStdString())));
         }
     }));
 }

@@ -40,7 +40,7 @@ if(NOT DEFINED VTK_QT_VERSION)
   set(VTK_QT_VERSION 6)
 endif()
 
-find_package(PCL REQUIRED COMPONENTS common io)
+find_package(PCL REQUIRED COMPONENTS common io filters)
 
 if(NOT PCL_FOUND)
 	message(FATAL_ERROR "PCL not found.")

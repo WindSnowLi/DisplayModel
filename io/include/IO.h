@@ -76,5 +76,12 @@ namespace PC {
      */
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr Read(const std::string& filename);
 
+    /**
+     * @brief 点云滤波
+     * @param cloud 点云
+     * @return pcl::PointCloud<pcl::PointXYZRGB>::Ptr
+     */
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr Filter(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
+
 }; // namespace PointCloud
 }; // namespace IO
