@@ -24,11 +24,6 @@
 
 // OCCT
 #include <BRepBndLib.hxx>
-#include <BRepBuilderAPI_MakeVertex.hxx>
-#include <BRepBuilderAPI_Transform.hxx>
-#include <BRepPrimAPI_MakeBox.hxx>
-#include <BRepPrimAPI_MakeCone.hxx>
-#include <Bnd_Box.hxx>
 #include <IGESControl_Reader.hxx>
 #include <IVtkTools_ShapeDataSource.hxx>
 #include <STEPCAFControl_Reader.hxx>
